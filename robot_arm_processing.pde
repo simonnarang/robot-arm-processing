@@ -7,6 +7,8 @@ OscP5 oscP5;                   //  Set oscP5 as OSC connection
 
 int redLED = 0;                //  redLED lets us know if the LED is on or off
 int [] led = new int [2];      //  Array allows us to add more toggle buttons in TouchOSC
+boolean newOSCMessage = false;
+char OSCMessage;
 
 void setup() {
   size(100,100);               // Processing screen size
@@ -20,18 +22,24 @@ void setup() {
 void oscEvent(OscMessage theOscMessage) {   //  This runs whenever there is a new OSC message
 
     String addr = theOscMessage.addrPattern();  //  Creates a string out of the OSC message
-    println("Received ");
+    print("Received [");
     print(addr);
-    print(" from OSC IOS App");
-    sendSerialMessage(addr.charAt(3));
-    println("Sent ");
-    print(addr.charAt(3));
-    print(" to Arduino serial system");
+    println("] from OSC IOS App");
+    OSCMessage = addr.charAt(3);
+    newOSCMessage = true;
     
 }
 
-void sendSerialMessage(char message) {
-  
-  arduinoPort.write(message);
-  
+void draw() {
+  if (arduinoPort.available() > 0) {
+    print("testsauce ");
+    println(arduinoPort.read());
+  }
+  if (newOSCMessage == true) {
+    arduinoPort.write(OSCMessage);
+    newOSCMessage = false;
+    print("Sent [");
+    print(OSCMessage);
+    println("] to Arduino serial system");
+  }
 }
